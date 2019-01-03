@@ -1,0 +1,7 @@
+--
+-- Mony 脚本引擎 v1.0
+-- 日期: 2018-11-20
+--
+
+mony_http_get("https://necaptcha.nosdn.127.net/03252051785544d39b706afbd996c093.png", "03252051785544d39b706afbd996c093.png");
+mony_http_get("https://necaptcha.nosdn.127.net/1c78b4ce80fd404e9dc00c9b0697f4ac.jpg", "1c78b4ce80fd404e9dc00c9b0697f4ac.jpg");

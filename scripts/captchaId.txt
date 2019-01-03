@@ -1,0 +1,9 @@
+--
+-- Mony 脚本引擎 v1.0
+-- 日期: 2018-11-20
+--
+
+content = mony_http_get("https://passport.kanxue.com/user-login.htm", "");
+mony_trace("content = " .. content);
+captchaId = mony_string_cut(content, "captchaId: '", "'");
+mony_trace("captchaId = " .. captchaId);

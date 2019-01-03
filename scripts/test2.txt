@@ -1,0 +1,25 @@
+--
+-- Mony 脚本引擎 v1.0
+-- 日期: 2018-11-20
+--
+-- 获取登录用 cookie 的代码
+--
+
+-- 清空 http param
+-- 检查是否已经有 cookies
+mony_clear_http_param_map();
+cookies = mony_load_durable_param("cookies");
+
+if (cookies == "") then
+	
+	mony_trace("111");
+	-- 获取 cookies
+	mony_set_http_param("Cookie" , "");
+	content = mony_http_get("https://passport.kanxue.com/user-login.htm" , "");
+	mony_trace(content);
+	
+else
+
+	mony_trace("222");
+
+end

@@ -1,0 +1,121 @@
+--
+-- Mony 脚本引擎 v1.0
+-- 日期: 2018-11-20
+--
+
+-- 获取验证码 ID
+local content = mony_http_get("https://passport.kanxue.com/user-login.htm", "");
+local captcha_id = mony_string_cut(content, "captchaId: '", "'");
+mony_trace("captcha_id = " .. captcha_id);
+
+-- 获取设备指纹
+local fp = mony_run_js("fp.js", "W", 0);
+fp = mony_string_url_decp1(fp, "utf-8");
+mony_trace("fp = " .. fp);
+
+-- 获取 cb
+local cb = mony_run_js("cb.js", "getid", 0);
+cb = mony_string_url_decp1(cb, "utf-8");
+mony_trace("cb = " .. cb);
+
+-- 获取 token
+local get_content = mony_http_get("https://c.dun.163yun.com/api/v2/get?id=" .. captcha_id .. "&" .. "fp=" .. fp .."&https=true&type=undefined&version=2.9.4&dpr=1&dev=1&" .. "cb=" .. cb .. "&width=286&token=&referer=https%3A%2F%2Fpassport.kanxue.com%2Fuser-login.htm&callback=__JSONP_lrjhjjg_0", "");
+mony_trace("get_content = " .. get_content);
+local token = mony_string_cut(get_content, "\"token\":\"", "\"");
+mony_trace("token = " .. token);
+if token == "" then
+	return;
+end
+
+-- 获取验证码图片
+local img_bg_url = mony_string_cut(get_content, "\"bg\":[\"", "\"");
+mony_trace("img_bg_url = " .. img_bg_url);
+local img_bg = mony_string_cut(img_bg_url .. "#", "https://necaptcha.nosdn.127.net/", "#"); 
+mony_trace("img_bg = " .. img_bg);
+mony_http_get_file(img_bg_url, img_bg);
+local img_front_url = mony_string_cut(get_content, "\"front\":[\"", "\"");
+mony_trace("img_front_url = " .. img_front_url);
+local img_front = mony_string_cut(img_front_url .. "#", "https://necaptcha.nosdn.127.net/", "#");
+mony_trace("img_front = " .. img_front);
+mony_http_get_file(img_front_url, img_front);
+
+-- 寻找最佳匹配位置
+local x, y = mony_match_template("D:\\TestQt\\MonyBuilder\\run\\" .. img_bg, "D:\\TestQt\\MonyBuilder\\run\\" .. img_front);
+mony_trace("x = " .. x .. ",y = " .. y);
+
+-- 加密 d 数据
+local begin_time = mony_date_milli();
+local dragX;
+local interval_time = 20;
+local sum_time = 0;
+local n = {};
+for i = 1, 50 do
+	sum_time = sum_time + interval_time;
+	mony_trace("sum_time = " .. sum_time);
+	dragX = x * sum_time / 1000;
+	dragX = math.floor(dragX);
+	mony_trace("dragX = " .. dragX);
+	local clientY = 199;
+	local startY = 199;
+	local arr = { dragX < 0 and 0 or dragX, clientY - startY, sum_time };
+	local str2 = "";
+	for i = 1, 3 do
+		if i < 3 then
+			str2 = str2 .. arr[i] .. ',';
+		else 
+			str2 = str2 .. arr[i];
+		end
+	end
+	local f = mony_run_js("encrypt.js", "y2", token, str2, 2);
+	mony_trace("f = " .. f);
+	n[i] = f;
+end
+local str = "";
+for i = 1, 50 do
+	if i < 50 then
+		str = str .. n[i] .. ":";
+	else 
+		str = str .. n[i];
+	end
+end
+mony_trace("str = " .. str);
+local d = mony_run_js("encrypt.js", "F", str, 1);
+mony_trace("d = " .. d);
+
+-- 加密 p 数据
+local left = x;	
+local width = 286;
+local p = mony_run_js("encrypt.js", "y2", token, left / width * 100 .. "", 2);
+p = mony_run_js("encrypt.js", "F", p, 1);
+mony_trace("p = " .. p);
+
+-- 加密 ext 数据
+local mouseDownCounts = 1;
+local ext = mony_run_js("encrypt.js", "y2", token, mouseDownCounts .. ',' .. #n, 2);
+ext = mony_run_js("encrypt.js", "F", ext, 1);
+mony_trace("ext = " .. ext);
+
+-- 发送滑动数据
+local url = "https://c.dun.163yun.com/api/v2/check?id=" .. captcha_id;
+url = url .. "&token=" .. token;
+url = url .. "&acToken=" .. "";
+local data = "{\"d\":\"" .. d .. "\"";
+data = data .. ",\"m\":" .. "\"";
+data = data .. ",\"p\":" .. p .. "\"";
+data = data .. ",\"ext\":" .. ext .. "\"";
+data = data .. "}";
+mony_trace("data = " .. data);
+url = url .. "&data=" .. data;
+url = url .. "&width=286";
+url = url .. "&type=2";
+url = url .. "&version=2.9.4";
+url = url .. "&cb=NdfGb2iXpFlfhLCFUOyaQwUYpapoVQK2jBUtcCGBb5NceIVRfBg8dtYRRh%2BEOZhV";
+url = url .. "&referer=https%3A%2F%2Fpassport.kanxue.com%2Fuser-login.htm";
+url = url .. "&callback=__JSONP_ka4yoji_1";
+mony_trace("url = " .. url);
+local check_content = mony_http_get(url, "");
+mony_trace("check_content = " .. check_content);
+
+
+
+

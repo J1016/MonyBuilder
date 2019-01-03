@@ -1,0 +1,9 @@
+--
+-- Mony 脚本引擎 v1.0
+-- 日期: 2018-11-12
+--
+
+mony_set_global_param("username" , "18616149015");
+mony_set_global_param("password" , "123456");
+
+
